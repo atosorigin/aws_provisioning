@@ -1,0 +1,11 @@
+# The password for admin user
+fqdn: "{{env}}.digitaltulip.net"
+
+ami_id: ami-47a23a30
+aws_region: eu-west-1
+aws_key: Teamcity_New
+aws_az: eu-west-1a
+base_domain: ".{{env}}.digitaltulip.net"
+security_group: "{{env}}_security"
+ec2_security_group: "security_group_{{env}}_security"
+teamcity_ip: 54.247.85.187

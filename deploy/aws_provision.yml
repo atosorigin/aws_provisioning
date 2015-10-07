@@ -1,0 +1,134 @@
+--- 
+#iam.y
+- name : Create AWS instances
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+   - enc.yml
+  tasks:
+  - name: Create VPC
+    ec2_vpc:
+        state: present
+        cidr_block: 10.0.0.0/16
+        resource_tags: {"Environment":"{{env}}"}
+        dns_hostnames: yes
+        dns_support: yes
+        internet_gateway: yes
+        subnets:
+        - cidr: 10.0.0.0/24
+          az: "{{aws_az}}"
+          resource_tags: {"Environment":"{{env}}", "Tier" : "All"}
+        route_tables:
+          - subnets:
+              - 10.0.0.0/24
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
+        region: "{{aws_region}}"
+        wait: yes
+    register: vpc
+  - name: Create security group
+    ec2_group:
+        name: "{{security_group}}"
+        description: "A Security group for {{env}}"
+        region: "{{aws_region}}"
+        vpc_id: "{{vpc.vpc_id}}"
+        rules:
+        - proto: tcp
+          type: ssh
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+          rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          type: http
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+          rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          type: https
+          from_port: 443
+          to_port: 443
+          cidr_ip: 0.0.0.0/0
+          rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
+        - proto: all
+          type: all
+          from_port: any
+          to_port: any
+          cidr_ip: 10.0.0.0/24
+    register: basic_firewall
+  - name: Provision an Backbase Web server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - BB-Web"
+          class: "{{env}}-bbwebserver"
+          dnsname: bbweb{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - BB-Web"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.medium
+        assign_public_ip: yes
+    register: bbweb_ec2
+  - name: Provision an HAProxy server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - HAProxy"
+          class: "{{env}}-haproxyserver"
+          dnsname: haproxy{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - HAProxy"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.micro
+        assign_public_ip: yes
+    register: hap_ec2
+  - name: Provision an FIP Node server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - FIPNode-Web"
+          class: "{{env}}-fipnodeserver"
+          dnsname: fipnode{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - FIPNode-Web"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.micro
+        assign_public_ip: yes
+    register: fipnode_ec2
+      - name: Provision an CV Web Server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - CV-Web"
+          class: "{{env}}-cvwebserver"
+          dnsname: fipcv{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - CV-Web"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.medium
+        assign_public_ip: yes
+    register: cvweb_ec2
