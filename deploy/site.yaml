@@ -1,0 +1,17 @@
+---
+- name: Deploy Node Application
+  hosts: tag_class_{{env}}-fipnodeserver
+  remote_user: ubuntu
+  sudo: yes
+  roles : 
+    - mongodb
+    - web
+
+- name: Deploy HAProxy
+  hosts: tag_class_{{env}}-haproxyserver
+  vars_files:
+   - "vars/enc.yml"
+  remote_user: ubuntu
+  sudo: yes
+  roles:
+    - { role: haproxy, tags: ["http","haproxy"]}
