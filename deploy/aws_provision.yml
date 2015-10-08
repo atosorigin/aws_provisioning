@@ -116,3 +116,19 @@
         instance_type: t2.micro
         assign_public_ip: yes
     register: fipnode_ec2
+  - name: Provision an CV Web Server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - CV-Web"
+          class: "{{env}}-cvwebserver"
+          dnsname: fipcv{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - CV-Web"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.medium
+        assign_public_ip: yes
+    register: cvweb_ec2
