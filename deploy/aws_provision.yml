@@ -129,6 +129,6 @@
         vpc_subnet_id: "{{ vpc.subnets[0].id }}"
         image: '{{ ami_id }}'
         region: '{{aws_region}}'
-        instance_type: t2.micro
+        instance_type: t2.medium
         assign_public_ip: yes
     register: fipcv_ec2
