@@ -62,6 +62,15 @@
           - proto: all
             type: all
             cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          type: https
+          from_port: 3306
+          to_port: 3306
+          cidr_ip: 0.0.0.0/0
+          rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
         - proto: all
           type: all
           from_port: any
