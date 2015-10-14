@@ -141,3 +141,19 @@
         instance_type: t2.medium
         assign_public_ip: yes
     register: fipcv_ec2
+  - name: Provision an FIP CV Ansible server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - CVdemo-Web"
+          class: "{{env}}-CVdemoserver"
+          dnsname: cvdemo{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - CVdemo-Web"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.medium
+        assign_public_ip: yes
+    register: cvdemo_ec2
