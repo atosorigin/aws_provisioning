@@ -71,6 +71,15 @@
           - proto: all
             type: all
             cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          type: rdp
+          from_port: 3389
+          to_port: 3389
+          cidr_ip: 0.0.0.0/0
+          rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
         - proto: all
           type: all
           from_port: any
