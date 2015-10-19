@@ -141,6 +141,23 @@
         instance_type: t2.medium
         assign_public_ip: yes
     register: fipcv_ec2
+  - name: Provision an FIP CV Windows server
+    ec2:
+        key_name: '{{ aws_key }}'
+        instance_tags:
+          Name: "{{env}} - FIPcv-WinWeb"
+          class: "{{env}}-fipcvwinserver"
+          dnsname: fipcv{{base_domain}}
+        exact_count: 1
+        count_tag: {Name: "{{env}} - FIPcv-WinWeb"}
+        group_id: "{{basic_firewall.group_id}}"
+        vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+        image: '{{ ami_win_id }}'
+        region: '{{aws_region}}'
+        instance_type: t2.medium
+        user_data: "<powershell>Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force\n $storageDir = $pwd\n $webclient = New-Object System.Net.WebClient\n $url = \"https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1\"\n $file = \"C:\\Program Files\\Amazon\\Ec2ConfigService\\Scripts\\ConfigureRemotingForAnsible.ps1\"\n $webclient.DownloadFile($url,$file)\n $VerbosePreference=\"Continue\"\n & $file\n $user=[adsi]\"WinNT://localhost/{{windows_ssh_user}},user\"\n $user.SetPassword(\"{{windows_ssh_pass}}\")\n </powershell>"
+        assign_public_ip: yes
+    register: fipcvwin_ec2
   - name: Provision an FIP CV Ansible server
     ec2:
         key_name: '{{ aws_key }}'
