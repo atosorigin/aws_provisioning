@@ -33,7 +33,7 @@ fqdn: "{{env}}.digitaltulip.net"
 
 ami_id: ami-47a23a30
 aws_region: eu-west-1
-aws_key: Teamcity_New
+aws_key: TeamCityDefaultKey
 aws_az: eu-west-1a
 base_domain: ".{{env}}.digitaltulip.net"
 security_group: "{{env}}_security"
