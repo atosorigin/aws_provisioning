@@ -110,7 +110,7 @@
           class: "{{env}}-fiphaproxyserver"
           dnsname: fiphaproxy{{base_domain}}
         exact_count: 1
-        count_tag: {Name: "{{env}} - HAProxy"}
+        count_tag: {Name: "{{env}} - FIPHAProxy"}
         group_id: "{{basic_firewall.group_id}}"
         vpc_subnet_id: "{{ vpc.subnets[0].id }}"
         image: '{{ ami_id }}'
