@@ -38,6 +38,6 @@ aws_az: eu-west-1a
 base_domain: ".{{env}}.digitaltulip.net"
 security_group: "{{env}}_security"
 ec2_security_group: "security_group_{{env}}_security"
-teamcity_ip: 54.247.85.187
+teamcity_ip: 54.170.204.15
 ami_win_id: ami-abe9c9dc
 windows_ssh_user: Administrator
